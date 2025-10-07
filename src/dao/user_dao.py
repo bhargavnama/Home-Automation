@@ -6,14 +6,20 @@ class User:
     def __init__(self):
         self._sb = get_supabase()
         
-    def create_user(self, name: str, email: str, phone: str, city:str) -> Optional[Dict]:
+    def create_user(self, name: str, email: str, phone: str, city:str, password_hash: Optional[str] = None) -> Optional[Dict]:
         """
         
             creates a new user and returns the created users data
         """
         payload = { "name": name, "email": email, "phone": phone, "city": city }
-        resp = self._sb.table("users").insert(payload).execute()
-        return resp.data[0] if (resp.data and len(resp.data) > 0) else None
+        if password_hash is not None:
+            payload["password"] = password_hash
+        try:
+            resp = self._sb.table("users").insert(payload).execute()
+            return resp.data[0] if resp.data else None
+        except Exception as e:
+            print(f"[UserDAO] Failed to create user: {e}")
+            return None
     
     def update_user(self, user_id: int, fields: dict) -> Optional[Dict]:
         """

@@ -8,7 +8,7 @@ load_dotenv()
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
-def get_supabase():
+def get_supabase() -> Client:
     """
         Returns a supabase client. Raises RuntimeError if config missing.
     """

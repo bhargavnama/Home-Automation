@@ -22,3 +22,26 @@ Project structure
 - src/devices/: OOP device classes (SmartDevice, Light, Thermostat, Camera)
 - src/services/: Orchestration services for devices and controller
 - src/client/cli.py: Minimal CLI 
+
+## Streamlit Web App
+
+1. Create a `.env` file in project root with:
+
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_or_service_key
+```
+
+2. Install dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+3. Run the app from the project root:
+
+```
+streamlit run streamlit_app.py
+```
+
+4. Use the left sidebar to open `Devices` after signing in. Your Supabase Auth email should exist in the `users` table for device mapping. 

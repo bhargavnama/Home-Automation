@@ -66,8 +66,24 @@ class Device:
         """
             List all devices for a given user_id.
         """
+        # Fetch devices first
         resp = self._sb.table("devices").select("*").eq("user_id", user_id).execute()
-        return resp.data or []
+        devices = resp.data or []
+        if not devices:
+            return []
+        # Build a unique list of type_ids present
+        type_ids = sorted({d.get("type_id") for d in devices if d.get("type_id") is not None})
+        if not type_ids:
+            return devices
+        # Fetch type names in one query
+        type_rows = self._sb.table("device_types").select("type_id,type_name").in_("type_id", type_ids).execute()
+        id_to_name = {row["type_id"]: row.get("type_name") for row in (type_rows.data or [])}
+        # Annotate devices with type_name for UI convenience
+        for d in devices:
+            tid = d.get("type_id")
+            if tid in id_to_name:
+                d["type_name"] = id_to_name.get(tid)
+        return devices
     
     def get_devices_by_type_name(self, type_name: str) -> List[Dict]:
         """
@@ -77,7 +93,11 @@ class Device:
         if type_id is None:
             return []
         resp = self._sb.table("devices").select("*").eq("type_id", type_id).execute()
-        return resp.data or []
+        devices = resp.data or []
+        # Attach type_name for convenience
+        for d in devices:
+            d["type_name"] = type_name
+        return devices
     
     def set_device_setting(self, device_id: int, attribute: str, value: str) -> Optional[Dict]:
         """
