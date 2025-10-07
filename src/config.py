@@ -12,7 +12,16 @@ def get_supabase() -> Client:
     """
         Returns a supabase client. Raises RuntimeError if config missing.
     """
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        raise RuntimeError("Supabase url and Supabase key must be assigned in the .env")
-    else:
-        return create_client(SUPABASE_URL, SUPABASE_KEY)
+    url = SUPABASE_URL
+    key = SUPABASE_KEY
+    if not url or not key:
+        try:
+            import streamlit as st
+            # Prefer flat secrets keys; fallback raises KeyError if missing
+            url = url or st.secrets.get('SUPABASE_URL')
+            key = key or st.secrets.get('SUPABASE_KEY')
+        except Exception:
+            pass
+    if not url or not key:
+        raise RuntimeError("Supabase url and Supabase key must be set via environment variables or Streamlit secrets.")
+    return create_client(url, key)
